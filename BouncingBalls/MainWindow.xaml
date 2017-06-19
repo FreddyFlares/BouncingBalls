@@ -1,0 +1,81 @@
+﻿<Window x:Class="BouncingBalls.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:my="clr-namespace:BouncingBalls"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        Title="MainWindow"
+        Width="500"
+        Height="350"
+        Loaded="Window_Loaded">
+    <Window.DataContext>
+        <my:ViewModel />
+    </Window.DataContext>
+    <Window.Resources>
+        <my:ColorToBrushConverter x:Key="ColorToBrushConverter" />
+        <my:MultiplyConverter x:Key="MultiplyConverter" />
+        <my:BallToCanvasPositionConverter x:Key="BallToCanvasPositionConverter" />
+    </Window.Resources>
+    <!--  Ref: Stackoverflow to databind to the rendered Width and Height OneWayToSource  -->
+    <Grid>
+        <DockPanel LastChildFill="True">
+            <TextBlock DockPanel.Dock="Top" Text="{Binding Balls.Count}" />
+            <Slider Name="sldNrBalls"
+                    DockPanel.Dock="Top"
+                    Maximum="3000"
+                    Minimum="0"
+                    Value="100" />
+            <my:CustomItemsControl ItemsSource="{Binding Balls}">
+                <my:CustomItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas Background="Black"
+                                my:SizeObserver.Observe="True"
+                                my:SizeObserver.ObservedHeight="{Binding AreaHeight,
+                                                                         Mode=OneWayToSource}"
+                                my:SizeObserver.ObservedWidth="{Binding AreaWidth,
+                                                                        Mode=OneWayToSource}" />
+                    </ItemsPanelTemplate>
+                </my:CustomItemsControl.ItemsPanel>
+                <my:CustomItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <my:UIVisual Fill="{Binding Colour, Converter={StaticResource ColorToBrushConverter}}" MouseDown="Ellipse_MouseDown">
+                            <my:UIVisual.Width>
+                                <Binding Converter="{StaticResource MultiplyConverter}" Path="Radius">
+                                    <Binding.ConverterParameter>
+                                        <sys:Int32>2</sys:Int32>
+                                    </Binding.ConverterParameter>
+                                </Binding>
+                            </my:UIVisual.Width>
+                            <my:UIVisual.Height>
+                                <Binding Converter="{StaticResource MultiplyConverter}" Path="Radius">
+                                    <Binding.ConverterParameter>
+                                        <sys:Int32>2</sys:Int32>
+                                    </Binding.ConverterParameter>
+                                </Binding>
+                            </my:UIVisual.Height>
+                        </my:UIVisual>
+                    </DataTemplate>
+                </my:CustomItemsControl.ItemTemplate>
+                <my:CustomItemsControl.ItemContainerStyle>
+                    <Style>
+                        <Setter Property="Canvas.Left">
+                            <Setter.Value>
+                                <MultiBinding Converter="{StaticResource BallToCanvasPositionConverter}">
+                                    <Binding Path="X" />
+                                    <Binding Path="Radius" />
+                                </MultiBinding>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Canvas.Top">
+                            <Setter.Value>
+                                <MultiBinding Converter="{StaticResource BallToCanvasPositionConverter}">
+                                    <Binding Path="Y" />
+                                    <Binding Path="Radius" />
+                                </MultiBinding>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </my:CustomItemsControl.ItemContainerStyle>
+            </my:CustomItemsControl>
+        </DockPanel>
+    </Grid>
+</Window>
